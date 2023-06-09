@@ -232,8 +232,12 @@ class SeismicRefractionManager(MethodManager):
         if self._data == None:
             self._logger.error('Data not loaded')
             return 0
-
-        if not (self._geomapp and self._pvd):
+        
+        if not self._geomapp:
+            self._logger.error('Geometry not applied')
+            return 0
+            
+        if self._pvd:
             self._logger.error('Geometry not applied')
             return 0
         
