@@ -17,7 +17,8 @@ import pandas as pd
 import pygimli as pg
 from pygimli.physics import Refraction, TravelTimeManager
 from scipy import fftpack
-from scipy.signal import boxcar, find_peaks
+from scipy.signal.windows import boxcar
+from scipy.signal import find_peaks
 import sys
 from typing import NamedTuple
 import warnings
