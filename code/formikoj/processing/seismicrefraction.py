@@ -297,10 +297,10 @@ class SeismicRefractionManager(MethodManager):
             tr.stats.channel = str(rsn)
             
             # set shot index number
-            tr.stats.SIN = int(shts[shts.ssn==ssn].sin)
+            tr.stats.SIN = int(shts[shts.ssn==ssn].sin.iloc[0])
             
             # determine channel offset
-            fg = int(shts[shts.ssn==ssn].fg)
+            fg = int(shts[shts.ssn==ssn].fg.iloc[0])
             
             # set receiver index number
             tr.stats.RIN = j + fg
@@ -1808,7 +1808,7 @@ class SeismicRefractionManager(MethodManager):
             trd = tr.data.copy()
                         
             if not self._pvd:
-                pol = int(recs[recs.rin==tr.stats.RIN].polarity)
+                pol = int(recs[recs.rin==tr.stats.RIN].polarity.iloc[0])
                 trd *= pol
             trd = trd * self._scaling + i
             
