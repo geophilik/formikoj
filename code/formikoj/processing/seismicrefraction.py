@@ -1518,6 +1518,11 @@ class SeismicRefractionManager(MethodManager):
                        pickset == \'%s\'""" % (self._activeps)
         psec = self.slh.read_data(cmd)
         
+        # check if Dataframe is empty
+        if psec.empty:
+            self._logger.info('No first break picks found')
+            return
+        
         cmd = """SELECT x, y, z
                  FROM geometry"""
         stations = self.slh.read_data(cmd)
@@ -1601,7 +1606,7 @@ class SeismicRefractionManager(MethodManager):
                 show_scalar_bar=False)
             
             labels = dict(
-                zlabel='Pseudodepth (m)', xlabel='X (m)', ylabel='Y (m)')
+                ztitle='Pseudodepth (m)', xtitle='X (m)', ytitle='Y (m)')
             self.ps3d.show_grid(**labels)
             self.ps3d.show()
         else:
