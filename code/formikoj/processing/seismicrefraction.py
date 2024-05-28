@@ -256,7 +256,7 @@ class SeismicRefractionManager(MethodManager):
         
         appgeom = self.slh.read_data("""SELECT COUNT(*)
                                         FROM applied_geometry""")
-        self._numpicks = int(appgeom.iloc[0])                                
+        self._numpicks = int(appgeom.iloc[0, 0])                                
         if self._numpicks > 0: self._geomapp = True
         
         self._logger.info('Project information loaded')
@@ -1103,7 +1103,9 @@ class SeismicRefractionManager(MethodManager):
             
             # receiver positions
             for idx, stat in stations.iterrows():
-                f.write('%.3f\t%.3f\t%.3f\n' % (stat[0], stat[1], stat[2]))
+                f.write('%.3f\t%.3f\t%.3f\n' % (stat.iloc[0], 
+                                                stat.iloc[1], 
+                                                stat.iloc[2]))
 
             validpcks = expcks[expcks.tt>=0]
             f.write('%d\n' % (validpcks.shape[0]))
@@ -1336,9 +1338,10 @@ class SeismicRefractionManager(MethodManager):
             
             self._logger.info('Pickset \'%s\' removed from workflow' % (p))
         
-        # check difference to _load_pickset()!    
         if self._selected != "":
-            self.select(self._selected.lower(), auto=True)
+            by = (self._selected.split(" ")[0]).lower()
+            curin = float(self._selected.split(" ")[1])
+            self.select(by=by, num=curin, auto=True)
 
     def _parse_pickset_params(self, do, options):
         """Check the basic validity of the picksets parameters and return them
@@ -1412,7 +1415,6 @@ class SeismicRefractionManager(MethodManager):
         elif do == 'rename':
             self._rename_pickset(options['name'].split(' '))
         elif do == 'use':
-            print(options['name'].split(' '))
             self._activate_pickset(options['name'].split(' '))
         elif do == 'export':
             self._export_pickset(options['name'].split(' '))
