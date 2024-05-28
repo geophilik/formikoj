@@ -523,7 +523,8 @@ class SeismicRefractionManager(MethodManager):
                     # stack traces
                     stacked_data = np.zeros_like(tmp[0].data, dtype=float)
                     for tr in tmp:
-                        state = int(recs[recs.rin == tr.stats.RIN].polarity)
+                        state = int(
+                            recs[recs.rin == tr.stats.RIN].polarity.iloc[0])
                         stacked_data += (tr.data * state)
                     stacked_data /= len(tmp)
                 else:
@@ -576,7 +577,7 @@ class SeismicRefractionManager(MethodManager):
         # determine first break picks
         with self.slh.dbc:
             for i, tr in enumerate(st):
-                tr.data -= np.median(tr.data)
+                tr.data -= int(np.median(tr.data))
                 
                 # compute envelope of trace data
                 env = envelope(tr.data)
@@ -672,7 +673,7 @@ class SeismicRefractionManager(MethodManager):
             self._logger.error('Invalid keyword given')
             return 0
         
-        if do == "autopick":
+        if do == "autopicking":
             if not ('pick' in options.keys() and 'pickset' in options.keys()):
                 self._logger.error(
                     'Insufficient ``autopicking`` parameters provided')
@@ -2042,14 +2043,12 @@ class SeismicRefractionManager(MethodManager):
             self._fig.canvas.draw()
         
         # update status bar text
-        try:
-            self._fig.canvas.motion_notify_event(
-                *self._ax.transData.transform_point([event.xdata,
-                                                     event.ydata]))
-        except TypeError as e: pass
+        self._fig.canvas.mouseMoveEvent(None)
 
     def _onmove_seismograms(self, event):
         """Process mouse move in plot figure."""
+        
+        # ~ print(event.canvas)
         
         if (self._fig.canvas.manager.toolbar.mode == "" and
             self._pressed):
@@ -2504,14 +2503,14 @@ class SeismicRefractionManager(MethodManager):
         recs = self.slh.read_data(cmd)
         
         for i, r in recs.iterrows():
-            if not r[2] in shts.iloc[:, 2].values:
-                self._ttax[0].plot(r[2], 0,
+            if not r.iloc[2] in shts.iloc[:, 2].values:
+                self._ttax[0].plot(r.iloc[2], 0,
                                    marker='v', c='k',
                                    markersize=8,
                                    markeredgecolor='k')
                 
-            self._ttax[0].annotate(str(int(r[0])),
-                                  (r[2], 0),
+            self._ttax[0].annotate(str(int(r.iloc[0])),
+                                  (r.iloc[2], 0),
                                   xytext=(0, -20),
                                   textcoords='offset pixels',
                                   ha='center',
@@ -2522,37 +2521,37 @@ class SeismicRefractionManager(MethodManager):
         # plot traveltime diagram
         for i, s in shts.iterrows():
             # draw station symbol
-            if s[2] in recs.iloc[:, 2].values:
+            if s.iloc[2] in recs.iloc[:, 2].values:
                 marker = 'o'
             else:
                 marker = '*'
                 
-            self._ttax[0].plot(s[2], 0,
+            self._ttax[0].plot(s.iloc[2], 0,
                                marker=marker,
-                               c=cmap[int(s[0]) % 10],
+                               c=cmap[int(s.iloc[0]) % 10],
                                markersize=10,
                                markeredgecolor='k')
             
-            self._ttax[0].annotate(str(int(s[0])),
-                                   (s[2], 0),
+            self._ttax[0].annotate(str(int(s.iloc[0])),
+                                   (s.iloc[2], 0),
                                    xytext=(0, 10), textcoords='offset pixels',
                                    ha='center',
                                    fontsize=self._fontsize - 2)
             
             # draw traveltime curve
-            tt = fbpicks[fbpicks.sin == s[0]].tt
-            rsid = fbpicks[fbpicks.sin == s[0]].rsid
+            tt = fbpicks[fbpicks.sin == s.iloc[0]].tt
+            rsid = fbpicks[fbpicks.sin == s.iloc[0]].rsid
             
             if len(tt) > 0:
                 X.append(list(rsid))
                 Y.append(list(tt))
-                colors.append(cmap[int(s[0]) % 10])
+                colors.append(cmap[int(s.iloc[0]) % 10])
             
                 self._ttax[1].scatter(rsid, tt,
-                                      color=cmap[int(s[0]) % 10],
+                                      color=cmap[int(s.iloc[0]) % 10],
                                       marker=self._marker,
                                       picker=True,
-                                      label=str(s[0]),
+                                      label=str(s.iloc[0]),
                                       **kwargs)
         
         lines = LineCollection((list(zip(x, y)) for x, y in zip(X, Y)),
