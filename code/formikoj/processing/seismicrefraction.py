@@ -2118,7 +2118,7 @@ class SeismicRefractionManager(MethodManager):
                         cmd = """SELECT polarity
                                  FROM receivers
                                  WHERE receiver_index_number==%d""" % (rin)
-                        pol = int(self.slh.read_data(cmd).polarity)
+                        pol = int(self.slh.read_data(cmd).polarity.iloc[0])
                         
                         if self._procmode == PROC_MODES.trace_reverse:
                             if pol != 0: pol *= -1
